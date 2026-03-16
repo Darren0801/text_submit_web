@@ -109,6 +109,47 @@
       box-shadow: 0 0 0 3px var(--accent-weak);
     }
 
+    /* Tabs样式 */
+    .tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 16px;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .tab:hover {
+      color: var(--text);
+    }
+    .tab.active {
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .tab-content {
+      display: none;
+      flex: 1;
+      min-height: 0;
+    }
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
     :root { --kb-offset: 0px; }
 
     .card {
@@ -196,6 +237,36 @@
     .primary:active { color: #fff; }
     button:disabled {
       cursor: not-allowed;
+
+    /* Checkbox样式 */
+    .todo-checkbox {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .todo-checkbox:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .todo-checkbox:checked::after {
+      content: "✓";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .todo-checkbox:hover {
+      border-color: var(--accent);
+    }
       filter: grayscale(0.08) brightness(0.96);
     }
     .primary:disabled {
@@ -367,12 +438,33 @@
         <span id="themeLabel">浅色</span>
       </button>
     </div>
-    <div class="card">
-      <div id="status" class="status"></div>
-      <div id="list" class="list"></div>
-      <div class="input-row">
-        <input id="input" class="text-input" type="text" placeholder="在此输入内容，点击发送提交" autocomplete="off" />
-        <button id="send" class="primary">发送</button>
+    <!-- Tab栏 -->
+    <div class="tabs">
+      <button class="tab active" data-tab="copy">copy</button>
+      <button class="tab" data-tab="todo">TODO</button>
+    </div>
+
+    <!-- copy内容区域 -->
+    <div id="copy-tab" class="tab-content active">
+      <div class="card">
+        <div id="status" class="status"></div>
+        <div id="list" class="list"></div>
+        <div class="input-row">
+          <input id="input" class="text-input" type="text" placeholder="在此输入内容，点击发送提交" autocomplete="off" />
+          <button id="send" class="primary">发送</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODO内容区域 -->
+    <div id="todo-tab" class="tab-content">
+      <div class="card">
+        <div id="todo-status" class="status"></div>
+        <div id="todo-list" class="list"></div>
+        <div class="input-row">
+          <input id="todo-input" class="text-input" type="text" placeholder="输入TODO事项" autocomplete="off" />
+          <button id="todo-send" class="primary">添加</button>
+        </div>
       </div>
     </div>
   </div>
@@ -394,10 +486,21 @@
 
   <script>
     const API_BASE = "https://early-api.fishbule.cn";
+    const LOCAL_STORAGE_KEY = 'activeTab';
+
+    // DOM元素
     const listEl = document.getElementById("list");
     const statusEl = document.getElementById("status");
     const inputEl = document.getElementById("input");
     const sendBtn = document.getElementById("send");
+
+    // TODO相关DOM元素
+    const todoListEl = document.getElementById("todo-list");
+    const todoStatusEl = document.getElementById("todo-status");
+    const todoInputEl = document.getElementById("todo-input");
+    const todoSendBtn = document.getElementById("todo-send");
+
+    // 公共DOM元素
     const refreshBtn = document.getElementById("refreshBtn");
     const themeBtn = document.getElementById("themeBtn");
     const themeLabel = document.getElementById("themeLabel");
@@ -407,8 +510,13 @@
     const modalCancelBtn = document.getElementById("modalCancel");
     const modalConfirmBtn = document.getElementById("modalConfirm");
     const toastEl = document.getElementById("toast");
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
     let itemsCache = [];
+    let todosCache = [];
     let pendingDeleteId = null;
+    let pendingDeleteTodoId = null;
     const initialViewportHeight = window.visualViewport?.height || window.innerHeight;
     let baseViewportHeight = initialViewportHeight;
     let locked = false;
@@ -494,7 +602,66 @@
       applyTheme(next);
     });
     refreshBtn.addEventListener("click", () => {
-      fetchTexts();
+      const activeTab = getActiveTab();
+      if (activeTab === 'copy') {
+        fetchTexts();
+      } else {
+        fetchTodos();
+      }
+    });
+
+    // Tab切换逻辑
+    function getActiveTab() {
+      try {
+        return localStorage.getItem(LOCAL_STORAGE_KEY) || 'copy';
+      } catch {
+        return 'copy';
+      }
+    }
+
+    function setActiveTab(tabName) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, tabName);
+      } catch {}
+
+      // 更新tab按钮状态
+      tabs.forEach(tab => {
+        if (tab.dataset.tab === tabName) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      // 更新内容区域
+      tabContents.forEach(content => {
+        if (content.id === `${tabName}-tab`) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+
+      // 根据tab加载相应数据
+      if (tabName === 'copy') {
+        if (itemsCache.length === 0) {
+          fetchTexts();
+        }
+      } else {
+        if (todosCache.length === 0) {
+          fetchTodos();
+        }
+      }
+    }
+
+    // 初始化tab状态
+    setActiveTab(getActiveTab());
+
+    // 监听tab点击事件
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        setActiveTab(tab.dataset.tab);
+      });
     });
 
     async function fetchTexts() {
@@ -697,6 +864,179 @@
       await deleteText(id);
     });
 
-    fetchTexts();
+    // =========================== TODO 相关功能 ===========================
+
+    // TODO专用状态设置函数
+    function setTodoStatus(msg, isError = false) {
+      todoStatusEl.textContent = msg || "";
+      todoStatusEl.style.color = isError ? "#b91c1c" : "var(--muted)";
+    }
+
+    // TODO列表渲染
+    function renderTodoList(todos) {
+      if (!todos.length) {
+        todoListEl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:18px 0;">暂无TODO事项</div>';
+        return;
+      }
+
+      // 显示最新在底部：反转顺序（接口为倒序）
+      const ordered = [...todos].reverse();
+      todoListEl.innerHTML = ordered
+        .map(todo => {
+          const time = formatTime(todo.created_at);
+          return `
+            <div class="todo-item item" data-id="${todo.id}">
+              <div style="display: flex; align-items: start; gap: 12px; width: 100%;">
+                <!-- 单选框 -->
+                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" style="margin-top: 2px; cursor: pointer;" />
+                <div style="flex: 1;">
+                  <div class="content">${escapeHtml(todo.todoData)}</div>
+                  <div class="meta">${time}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+
+      // 滚动到底部以显示最新数据
+      requestAnimationFrame(() => {
+        todoListEl.scrollTop = todoListEl.scrollHeight;
+      });
+
+      // 添加单选框点击事件
+      const checkboxes = todoListEl.querySelectorAll('.todo-checkbox');
+      checkboxes.forEach(cb => {
+        const id = cb.dataset.id;
+        // 移除之前的事件监听器
+        cb.replaceWith(cb.cloneNode(true));
+      });
+    }
+
+    // 获取TODO列表
+    async function fetchTodos() {
+      setTodoStatus("加载中...");
+      try {
+        const res = await fetch(API_BASE + "/todoList");
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "加载失败");
+        todosCache = data.data || [];
+        renderTodoList(todosCache);
+        setTodoStatus(`共 ${data.count ?? data.data.length} 项`);
+      } catch (e) {
+        setTodoStatus(e.message, true);
+      }
+    }
+
+    // 提交TODO
+    async function submitTodo() {
+      const todoData = todoInputEl.value.trim();
+      todoInputEl.blur();
+      todoInputEl.value = "";
+      if (!todoData) {
+        setTodoStatus("TODO内容不能为空", true);
+        return;
+      }
+
+      const tempTodo = {
+        id: "tmp-" + Date.now(),
+        todoData,
+        created_at: new Date().toISOString(),
+      };
+
+      todosCache = [tempTodo, ...todosCache];
+      renderTodoList(todosCache);
+
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 12000);
+        const res = await fetch(API_BASE + "/todo-submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ todoData }),
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "提交失败");
+
+        // replace temp with real item
+        todosCache = todosCache.map(i => i.id === tempTodo.id ? data.data : i);
+        setTodoStatus("添加成功");
+        showToast("TODO添加成功");
+        await fetchTodos();
+      } catch (e) {
+        setTodoStatus(e.message, true);
+        showToast(e.message, true);
+        // revert optimistic item
+        todosCache = todosCache.filter(i => i.id !== tempTodo.id);
+        renderTodoList(todosCache);
+      }
+    }
+
+    // 删除TODO（通过点击单选框）
+    async function deleteTodo(id) {
+      if (!id) {
+        setTodoStatus("缺少ID", true);
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + "/del-todo", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "删除失败");
+
+        setTodoStatus("已删除");
+        showToast("TODO已删除");
+        await fetchTodos();
+      } catch (e) {
+        setTodoStatus(e.message, true);
+        showToast(e.message, true);
+      }
+    }
+
+    // TODO相关事件监听
+    let todoTouchSending = false;
+    todoSendBtn.addEventListener("touchstart", (e) => {
+      todoTouchSending = true;
+      e.preventDefault();
+      submitTodo();
+      setTimeout(() => { todoTouchSending = false; }, 350);
+    }, { passive: false });
+
+    todoSendBtn.addEventListener("click", (e) => {
+      if (todoTouchSending) return;
+      submitTodo();
+    });
+
+    todoInputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitTodo();
+      }
+    });
+
+    // 监听TODO列表的单选框点击
+    todoListEl.addEventListener("click", (e) => {
+      const target = e.target;
+      if (target.classList.contains("todo-checkbox")) {
+        const id = target.dataset.id;
+        if (id && !id.startsWith("tmp-")) {
+          deleteTodo(id);
+        }
+      }
+    });
+
+    // 根据当前激活的tab加载数据
+    const activeTab = getActiveTab();
+    if (activeTab === 'copy') {
+      fetchTexts();
+    } else {
+      fetchTodos();
+    }
   </script>
 </body>
