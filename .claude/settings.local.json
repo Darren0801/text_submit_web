@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -I \"https://early-api.fishbule.cn/texts\" -s)"
+    ]
+  }
+}

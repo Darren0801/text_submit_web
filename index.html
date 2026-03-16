@@ -3,614 +3,776 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-
   <title>TODO</title>
   <style>
+    /* VSCode深色主题配色 */
     :root {
       --bg: #f8f9fb;
       --card: #ffffff;
       --text: #0f172a;
-      --muted: #64748b;
-      --accent: #2563eb;
-      --accent-weak: #e2e8f0;
+      --text-secondary: #64748b;
       --border: #e5e7eb;
-      --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-      --radius: 14px;
+      --input-bg: #ffffff;
+      --accent: #2563eb;
+      --accent-rgb: 37, 99, 235;
+      --accent-hover: #1d4ed8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
       --vh: 1vh;
-      font-family: "Segoe UI", "PingFang SC", -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
     }
 
     :root.dark {
-      --bg: #0b1220;
-      --card: #0f172a;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-weak: #1e293b;
-      --border: #1f2937;
-      --shadow: none;
+      /* VSCode深色主题配色 */
+      --bg: #1e1e1e;
+      --card: #252526;
+      --text: #d4d4d4;
+      --text-secondary: #858585;
+      --border: #3e3e3e;
+      --input-bg: #3c3c3c;
+      --accent: #007acc;
+      --accent-rgb: 0, 122, 204;
+      --accent-hover: #0e639c;
+      --success: #89d185;
+      --danger: #f48771;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       margin: 0;
-      background: radial-gradient(circle at 20% 20%, #e0ecff 0, transparent 30%),
-                  radial-gradient(circle at 80% 0%, #ffe6f0 0, transparent 26%),
-                  var(--bg);
-      color: var(--text);
-      min-height: calc(var(--vh) * 100);
-      height: calc(var(--vh) * 100);
-      padding: 20px 12px 16px;
-      overflow: hidden;
-      overscroll-behavior: none;
-      position: relative;
-      width: 100%;
-    }
-    body.page-locked {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-    }
-
-    :root.dark body {
       background: var(--bg);
-    }
-
-    .container {
-      max-width: 880px;
-      margin: 0 auto;
-      height: calc(var(--vh) * 100 - 32px);
+      color: var(--text);
+      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
+      padding: 12px;
     }
-    .header {
+
+    /* 顶部标题栏 */
+    .top-bar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
     }
-    .title { font-size: 20px; font-weight: 700; }
-    .subtitle { color: var(--muted); }
-    .refresh-btn {
-      display: inline-flex;
+
+    .title-section {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      box-shadow: var(--shadow);
+      gap: 12px;
     }
-    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .app-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .tab-switcher {
+      display: flex;
+      gap: 1px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px;
+      overflow: hidden;
+    }
+
+    .tab-btn {
+      padding: 6px 16px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .tab-btn:first-child {
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px;
+    }
+
+    .tab-btn:last-child {
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+
+    .tab-btn:hover {
+      background: rgba(var(--accent-rgb, 37, 99, 235), 0.1);
+      color: var(--accent);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
     .theme-toggle {
-      display: inline-flex;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-left: auto;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 13px;
+      display: flex;
       align-items: center;
       gap: 8px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 6px 10px;
-      cursor: pointer;
-      background: var(--card);
-      color: var(--text);
       transition: all 0.15s ease;
-      box-shadow: var(--shadow);
     }
-    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+    }
+
     .theme-dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-weak);
     }
 
-    /* Tabs样式 */
-    .tabs {
-      display: flex;
-      gap: 2px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-    .tab {
+    /* 内容区域 */
+    .content-area {
       flex: 1;
-      border: none;
-      background: transparent;
-      padding: 10px 16px;
-      color: var(--muted);
-      cursor: pointer;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.15s ease;
-    }
-    .tab:hover {
-      color: var(--text);
-    }
-    .tab.active {
-      background: var(--card);
-      color: var(--text);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    }
-    .tab-content {
-      display: none;
-      flex: 1;
-      min-height: 0;
-    }
-    .tab-content.active {
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    :root { --kb-offset: 0px; }
+    .tab-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tab-content:not(.active) {
+      display: none;
+    }
+
+    /* COPY页面样式 - 恢复原来有圆角和内边距的卡片式布局 */
+    .copy-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
+    }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      flex: 1;
       display: flex;
       flex-direction: column;
-      flex: 1 1 auto;
-      min-height: 0;
       overflow: hidden;
-      gap: 12px;
-      position: relative;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
     }
+
+    :root.dark .card {
+      box-shadow: none;
+      background: #1e1e1e;
+      border-color: #404040;
+    }
+
+    .status {
+      color: var(--text-secondary);
+      font-size: 13px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      flex-shrink: 0;
+    }
+
     .list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      flex: 1 1 auto;
-      overflow-y: auto;
-      padding-right: 4px;
-      scroll-behavior: smooth;
-      overscroll-behavior: contain;
-      padding-bottom: calc(72px + var(--kb-offset) + env(safe-area-inset-bottom, 0px));
+      gap: 10px;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
     }
+
     .item {
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 12px 10px;
+      border-radius: 10px;
+      padding: 14px;
       background: var(--card);
-      color: var(--text);
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: start;
+      gap: 16px;
+      align-items: flex-start;
+      transition: all 0.15s ease;
+      flex-shrink: 0; /* 防止项目被压缩 */
     }
-    .content {
+
+    .item:hover {
+      border-color: var(--accent);
+    }
+
+    .item-content {
+      color: var(--text);
       word-break: break-word;
       white-space: pre-wrap;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      max-height: 48px;
-      color: var(--text);
+      line-height: 1.5;
     }
-    .content a {
-      color: inherit;
-      text-decoration: none;
+
+    .item-meta {
+      color: var(--text-secondary);
+      font-size: 12px;
+      margin-top: 6px;
     }
-    .meta { color: var(--muted); font-size: 12px; }
-    .actions { display: flex; gap: 8px; flex-wrap: nowrap; }
-    button {
-      border: 1px solid var(--border);
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 6px 12px;
       background: var(--card);
-      border-radius: 10px;
-      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
       cursor: pointer;
       color: var(--text);
+      font-size: 13px;
       transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    /* 自定义滚动条 */
+    .list::-webkit-scrollbar,
+    .todo-list-wrapper::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .list::-webkit-scrollbar-track,
+    .todo-list-wrapper::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 3px;
+    }
+
+    .list::-webkit-scrollbar-thumb,
+    .todo-list-wrapper::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .list::-webkit-scrollbar-thumb:hover,
+    .todo-list-wrapper::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    :root.dark .list::-webkit-scrollbar-thumb,
+    :root.dark .todo-list-wrapper::-webkit-scrollbar-thumb {
+      background: #555;
+    }
+
+    :root.dark .list::-webkit-scrollbar-thumb:hover,
+    :root.dark .todo-list-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #777;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      background: var(--card);
+      flex-shrink: 0; /* 防止输入区域被压缩 */
+    }
+
+    .text-input {
+      flex: 1;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
       font-size: 14px;
     }
-    button:hover { border-color: var(--accent); color: var(--accent); }
-    .danger { color: #b91c1c; border-color: #fecdd3; }
-    .danger:hover { background: #fff1f2; border-color: #fca5a5; }
-    .primary {
-      background: var(--accent);
-      color: #fff !important;
-      border-color: var(--accent);
-      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 80px;
-      padding: 10px 16px;
-      white-space: nowrap;
-      font-weight: 700;
-      font-size: 15px;
-      line-height: 1;
-      height: 42px;
-    }
-    .primary:hover { filter: brightness(1.05); }
-    .primary:active { color: #fff; }
-    button:disabled {
-      cursor: not-allowed;
 
-    /* Checkbox样式 */
-    .todo-checkbox {
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border: 1.5px solid var(--border);
+    .text-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(var(--accent-rgb, 37, 99, 235), 0.1);
+    }
+
+    /* TODO页面样式 */
+    .todo-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
+    }
+
+    .todo-input-area {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      flex-shrink: 0; /* 防止输入区域被压缩 */
+    }
+
+    .todo-input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .todo-input {
+      flex: 1;
+      padding: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      height: 44px;
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .todo-list-wrapper {
+      flex: 1;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
+      overflow-y: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      transition: all 0.4s ease;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .todo-item.removing {
+      opacity: 0;
+      transform: translateY(20px);
+      height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-width: 0;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 改进单选框样式 - 使用span标签自定义 */
+    .todo-checkbox-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .todo-checkbox-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .custom-checkbox {
+      width: 26px;
+      height: 26px;
+      border: 2px solid var(--text-secondary);
       border-radius: 50%;
       background: transparent;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
     }
-    .todo-checkbox:checked {
-      background: var(--accent);
+
+    .custom-checkbox:hover {
       border-color: var(--accent);
+      transform: scale(1.05);
     }
-    .todo-checkbox:checked::after {
+
+    .todo-checkbox-input:checked + .custom-checkbox {
+      background: var(--success);
+      border-color: var(--success);
+      animation: checkPulse 0.3s ease;
+    }
+
+    .todo-checkbox-input:checked + .custom-checkbox::before {
       content: "✓";
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: white;
+    }
+
+    @keyframes checkPulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .todo-content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .todo-content {
+      color: var(--text);
+      word-break: break-word;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    .todo-time {
+      color: var(--text-secondary);
       font-size: 11px;
-      font-weight: bold;
-    }
-    .todo-checkbox:hover {
-      border-color: var(--accent);
-    }
-      filter: grayscale(0.08) brightness(0.96);
-    }
-    .primary:disabled {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      box-shadow: none;
-      filter: none;
     }
 
-    .status { color: var(--muted); font-size: 13px; min-height: 18px; }
-    .input-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
+    .empty-state {
+      display: flex;
       align-items: center;
-      padding-top: 8px;
-      padding-bottom: 4px;
-      position: sticky;
-      bottom: calc(var(--kb-offset) + env(safe-area-inset-bottom, 0px));
-      background: var(--card);
-      z-index: 2;
-      box-shadow: 0 -6px 18px rgba(0,0,0,0.04);
-    }
-    .text-input {
-      width: 100%;
-      height: 42px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0 12px;
-      font-size: 16px;
-      font-family: inherit;
-      background: var(--card);
-      color: var(--text);
-      line-height: 42px;
-    }
-    .text-input::placeholder { color: var(--muted); }
-    .text-input:focus { outline: 2px solid rgba(37, 99, 235, 0.2); border-color: var(--accent); }
-    @media (max-width: 640px) {
-      :root, body, html { height: calc(var(--vh) * 100); overflow: hidden; }
-      body {
-        padding: 12px 10px 12px;
-      }
-      .container { height: calc(var(--vh) * 100 - 24px); display: flex; flex-direction: column; gap: 10px; }
-      .card {
-        flex: 1 1 auto;
-        max-height: none;
-        display: flex;
-        flex-direction: column;
-      }
-      .list {
-        max-height: none;
-        flex: 1 1 auto;
-        min-height: 0;
-        padding-bottom: 12px;
-      }
-      .item { grid-template-columns: 1fr auto; gap: 8px; }
-      .actions { justify-content: flex-end; gap: 6px; }
-      .actions button { font-size: 13px; padding: 7px 9px; white-space: nowrap; }
-      .input-row { grid-template-columns: 1fr auto; gap: 8px; }
+      justify-content: center;
+      padding: 48px 20px;
+      color: var(--text-secondary);
+      text-align: center;
+      font-style: italic;
     }
 
-    /* Dark theme overrides */
-    :root.dark .item {
-      background: var(--card);
-      color: var(--muted);
-    }
-    :root.dark .item .content,
-    :root.dark .item .meta {
-      color: var(--muted);
-    }
-    :root.dark .title {
-      color: var(--muted);
-    }
-    :root.dark .theme-toggle {
-      color: var(--muted);
-    }
-    :root.dark .danger {
-      color: var(--muted);
-      border-color: var(--border);
-    }
-    :root.dark .danger:hover {
-      background: var(--border);
-      border-color: var(--border);
-    }
-    :root.dark .copy,
-    :root.dark .theme-toggle {
-      color: var(--muted);
-      border-color: var(--border);
-      background: var(--card);
-      box-shadow: none;
-    }
-    :root.dark .primary {
-      background: var(--card);
-      color: var(--muted);
-      border-color: var(--border);
-      box-shadow: none;
-    }
-    :root.dark .primary:disabled {
-      background: var(--card);
-      color: var(--muted);
-      border-color: var(--border);
-      filter: grayscale(0.08) brightness(0.98);
-    }
-
-    :root.dark .primary:hover,
-    :root.dark .copy:hover,
-    :root.dark .theme-toggle:hover {
-      color: var(--text);
-      border-color: var(--accent);
-    }
-
-    /* Modal & toast */
-    .modal-backdrop {
+    /* 弹窗和Toast */
+    .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.5);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 30;
+      z-index: 1000;
     }
-    .modal {
+
+    .modal-content {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      width: min(92vw, 360px);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .modal-text {
+      margin-bottom: 20px;
       color: var(--text);
     }
-    .modal h3 { margin: 0 0 8px; font-size: 16px; }
-    .modal p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
     .toast {
       position: fixed;
-      top: 16px;
-      right: 16px;
+      top: 20px;
+      right: 20px;
       background: var(--card);
       color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      box-shadow: var(--shadow);
+      border-radius: 6px;
+      padding: 12px 16px;
       display: none;
-      z-index: 40;
-      min-width: 180px;
-      font-size: 14px;
+      z-index: 1001;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; transform: translateX(20px); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* 响应式 */
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+      }
+
+      .top-bar {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 10px;
+      }
+
+      .title-section {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .app-title {
+        font-size: 18px;
+      }
+
+      .tab-switcher {
+        display: flex;
+        min-width: auto;
+      }
+
+      .tab-btn {
+        padding: 6px 10px;
+        min-width: 60px;
+        font-size: 12px;
+      }
+
+      .theme-toggle {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      .copy-page {
+        padding: 12px 0;
+      }
+
+      .card {
+        border-radius: 12px;
+      }
+
+      .list {
+        padding: 12px;
+      }
+
+      .item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .item-actions {
+        justify-content: flex-end;
+      }
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="title" style="display:flex;align-items:center;gap:10px;">
-        FISHBLUE
-        <button id="refreshBtn" class="refresh-btn" aria-label="刷新">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0114.13-3.36L23 10"></path>
-            <path d="M20.49 15a9 9 0 01-14.13 3.36L1 14"></path>
-          </svg>
-        </button>
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="title-section">
+      <div class="app-title">FISHBLUE</div>
+      <div class="tab-switcher">
+        <button class="tab-btn active" data-tab="copy">COPY</button>
+        <button class="tab-btn" data-tab="todo">TODO</button>
       </div>
-      <button id="themeBtn" class="theme-toggle" aria-label="切换主题">
-        <span class="theme-dot"></span>
-        <span id="themeLabel">浅色</span>
-      </button>
     </div>
-    <!-- Tab栏 -->
-    <div class="tabs">
-      <button class="tab active" data-tab="copy">copy</button>
-      <button class="tab" data-tab="todo">TODO</button>
-    </div>
+    <button class="theme-toggle" id="themeBtn">
+      <span class="theme-dot"></span>
+      <span id="themeLabel">浅色</span>
+    </button>
+  </div>
 
-    <!-- copy内容区域 -->
+  <!-- 内容区域 -->
+  <div class="content-area">
+    <!-- COPY页面 -->
     <div id="copy-tab" class="tab-content active">
-      <div class="card">
-        <div id="status" class="status"></div>
-        <div id="list" class="list"></div>
-        <div class="input-row">
-          <input id="input" class="text-input" type="text" placeholder="在此输入内容，点击发送提交" autocomplete="off" />
-          <button id="send" class="primary">发送</button>
+      <div class="copy-page">
+        <div class="card">
+          <div id="status" class="status">状态</div>
+          <div id="list" class="list"></div>
+          <div class="input-row">
+            <input id="input" class="text-input" type="text" placeholder="在此输入内容，点击发送提交" autocomplete="off" />
+            <button id="send" class="btn btn-primary">发送</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- TODO内容区域 -->
+    <!-- TODO页面 -->
     <div id="todo-tab" class="tab-content">
-      <div class="card">
-        <div id="todo-status" class="status"></div>
-        <div id="todo-list" class="list"></div>
-        <div class="input-row">
-          <input id="todo-input" class="text-input" type="text" placeholder="输入TODO事项" autocomplete="off" />
-          <button id="todo-send" class="primary">添加</button>
+      <div class="todo-container">
+        <!-- 顶部输入区域 -->
+        <div class="todo-input-area">
+          <div class="todo-input-row">
+            <input id="todo-input" class="todo-input" type="text" placeholder="输入TODO事项..." autocomplete="off" />
+            <button id="todo-send" class="btn btn-primary">添加</button>
+          </div>
+        </div>
+
+        <!-- TODO列表 -->
+        <div class="todo-list-wrapper">
+          <div id="todo-list" class="todo-list"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 自定义确认弹窗 -->
-  <div id="modal" class="modal-backdrop">
-    <div class="modal">
-      <h3>确认删除</h3>
-      <p id="modalText">确定删除这条记录吗？</p>
+  <!-- 弹窗 -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-text" id="modalText">确定删除这条记录吗？</div>
       <div class="modal-actions">
-        <button id="modalCancel">取消</button>
-        <button id="modalConfirm" class="danger">删除</button>
+        <button class="btn" id="modalCancel">取消</button>
+        <button class="btn btn-danger" id="modalConfirm">删除</button>
       </div>
     </div>
   </div>
 
-  <!-- 轻提示 -->
-  <div id="toast" class="toast"></div>
+  <!-- Toast提示 -->
+  <div class="toast" id="toast"></div>
 
   <script>
     const API_BASE = "https://early-api.fishbule.cn";
     const LOCAL_STORAGE_KEY = 'activeTab';
 
     // DOM元素
-    const listEl = document.getElementById("list");
-    const statusEl = document.getElementById("status");
-    const inputEl = document.getElementById("input");
-    const sendBtn = document.getElementById("send");
-
-    // TODO相关DOM元素
-    const todoListEl = document.getElementById("todo-list");
-    const todoStatusEl = document.getElementById("todo-status");
-    const todoInputEl = document.getElementById("todo-input");
-    const todoSendBtn = document.getElementById("todo-send");
-
-    // 公共DOM元素
-    const refreshBtn = document.getElementById("refreshBtn");
-    const themeBtn = document.getElementById("themeBtn");
-    const themeLabel = document.getElementById("themeLabel");
-    const rootEl = document.documentElement;
-    const modalEl = document.getElementById("modal");
-    const modalTextEl = document.getElementById("modalText");
-    const modalCancelBtn = document.getElementById("modalCancel");
-    const modalConfirmBtn = document.getElementById("modalConfirm");
-    const toastEl = document.getElementById("toast");
-    const tabs = document.querySelectorAll('.tab');
+    const themeBtn = document.getElementById('themeBtn');
+    const themeLabel = document.getElementById('themeLabel');
+    const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
+    // COPY页面元素
+    const copyStatusEl = document.getElementById('status');
+    const copyListEl = document.getElementById('list');
+    const copyInputEl = document.getElementById('input');
+    const copySendBtn = document.getElementById('send');
+
+    // TODO页面元素
+    const todoInputEl = document.getElementById('todo-input');
+    const todoSendBtn = document.getElementById('todo-send');
+    const todoListEl = document.getElementById('todo-list');
+
+    // 通用元素
+    const modalEl = document.getElementById('modal');
+    const modalTextEl = document.getElementById('modalText');
+    const modalCancelBtn = document.getElementById('modalCancel');
+    const modalConfirmBtn = document.getElementById('modalConfirm');
+    const toastEl = document.getElementById('toast');
+
+    // 状态
     let itemsCache = [];
     let todosCache = [];
     let pendingDeleteId = null;
-    let pendingDeleteTodoId = null;
-    const initialViewportHeight = window.visualViewport?.height || window.innerHeight;
-    let baseViewportHeight = initialViewportHeight;
-    let locked = false;
 
-    // 处理移动端视口高度（键盘弹出时防止布局被顶起后无法恢复）
-    const setViewportHeight = () => {
-      if (locked) {
-        document.documentElement.style.setProperty("--vh", `${baseViewportHeight * 0.01}px`);
-        return;
-      }
-      const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
-      document.documentElement.style.setProperty("--vh", `${vh}px`);
-    };
-    const setKeyboardOffset = () => {
-      const current = window.visualViewport?.height || window.innerHeight;
-      if (current > baseViewportHeight) baseViewportHeight = current; // 只抬高基线
-      const offset = Math.max(0, baseViewportHeight - current);
-      document.documentElement.style.setProperty("--kb-offset", `${offset}px`);
-      // 如果输入框在键盘弹出后被挤出视口，强制滚动到输入区
-      const inputRow = document.querySelector(".input-row");
-      if (inputRow) {
-        const rect = inputRow.getBoundingClientRect();
-        const viewportH = window.visualViewport?.height || window.innerHeight;
-        if (rect.bottom > viewportH) {
-          inputRow.scrollIntoView({ block: "end", behavior: "smooth" });
+    // 初始化主题
+    function initTheme() {
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved) {
+          applyTheme(saved);
+          return;
         }
-      }
-      window.scrollTo(0, 0);
-    };
-    const lockPage = () => {
-      if (locked) return;
-      locked = true;
-      document.body.classList.add("page-locked");
-      window.scrollTo(0, 0);
-      setTimeout(() => window.scrollTo(0, 0), 50);
-    };
-    const unlockPage = () => {
-      if (!locked) return;
-      locked = false;
-      document.body.classList.remove("page-locked");
-      window.scrollTo(0, 0);
-    };
-    setViewportHeight();
-    setKeyboardOffset();
-    window.addEventListener("resize", () => {
-      if (locked) return;
-      setViewportHeight();
-      setKeyboardOffset();
-    });
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", () => {
-        setViewportHeight();
-        setKeyboardOffset();
-      });
-      window.visualViewport.addEventListener("scroll", setKeyboardOffset);
-    }
-    inputEl.addEventListener("focus", () => { lockPage(); setKeyboardOffset(); });
-    inputEl.addEventListener("blur", () => { unlockPage(); document.documentElement.style.setProperty("--kb-offset", "0px"); });
+      } catch {}
 
-    function setStatus(msg, isError = false) {
-      statusEl.textContent = msg || "";
-      statusEl.style.color = isError ? "#b91c1c" : "var(--muted)";
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(prefersDark ? 'dark' : 'light');
     }
 
     function applyTheme(mode) {
-      const isDark = mode === "dark";
-      rootEl.classList.toggle("dark", isDark);
-      themeLabel.textContent = isDark ? "深色" : "浅色";
-      try { localStorage.setItem("theme", mode); } catch {}
+      const isDark = mode === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      themeLabel.textContent = isDark ? '深色' : '浅色';
+      try {
+        localStorage.setItem('theme', mode);
+      } catch {}
     }
 
-    // 初始主题：localStorage > 系统偏好 > 默认浅色
-    (() => {
-      let saved = null;
-      try { saved = localStorage.getItem("theme"); } catch {}
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initial = saved || (prefersDark ? "dark" : "light");
-      applyTheme(initial);
-    })();
-
-    themeBtn.addEventListener("click", () => {
-      const next = rootEl.classList.contains("dark") ? "light" : "dark";
-      applyTheme(next);
-    });
-    refreshBtn.addEventListener("click", () => {
-      const activeTab = getActiveTab();
-      if (activeTab === 'copy') {
-        fetchTexts();
-      } else {
-        fetchTodos();
-      }
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(isDark ? 'light' : 'dark');
     });
 
-    // Tab切换逻辑
+    // Tab切换功能
     function getActiveTab() {
       try {
         return localStorage.getItem(LOCAL_STORAGE_KEY) || 'copy';
@@ -624,12 +786,12 @@
         localStorage.setItem(LOCAL_STORAGE_KEY, tabName);
       } catch {}
 
-      // 更新tab按钮状态
-      tabs.forEach(tab => {
-        if (tab.dataset.tab === tabName) {
-          tab.classList.add('active');
+      // 更新tab按钮
+      tabBtns.forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('active');
         } else {
-          tab.classList.remove('active');
+          btn.classList.remove('active');
         }
       });
 
@@ -642,7 +804,7 @@
         }
       });
 
-      // 根据tab加载相应数据
+      // 加载对应数据
       if (tabName === 'copy') {
         if (itemsCache.length === 0) {
           fetchTexts();
@@ -654,389 +816,391 @@
       }
     }
 
-    // 初始化tab状态
-    setActiveTab(getActiveTab());
-
-    // 监听tab点击事件
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        setActiveTab(tab.dataset.tab);
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        setActiveTab(btn.dataset.tab);
       });
     });
 
-    async function fetchTexts() {
-      setStatus("加载中...");
-      try {
-        const res = await fetch(API_BASE + "/texts");
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "加载失败");
-        itemsCache = data.data || [];
-        renderList(itemsCache);
-        setStatus(`共 ${data.count ?? data.data.length} 条`);
-      } catch (e) {
-        setStatus(e.message, true);
-      }
+    // 初始化tab状态
+    setActiveTab(getActiveTab());
+
+    // Toast功能
+    function showToast(message, isError = false) {
+      toastEl.textContent = message;
+      toastEl.style.display = 'block';
+
+      setTimeout(() => {
+        toastEl.style.display = 'none';
+      }, 2000);
     }
 
-    function renderList(items) {
-      if (!items.length) {
-        listEl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:18px 0;">暂无数据</div>';
-        return;
-      }
-      // 显示最新在底部：反转顺序（接口为倒序）
-      const ordered = [...items].reverse();
-      listEl.innerHTML = ordered
-        .map(item => {
-          const time = formatTime(item.created_at);
-          return `
-            <div class="item" data-id="${item.id}">
-              <div>
-                <div class="content">${escapeHtml(item.content)}</div>
-                <div class="meta">${time}</div>
-              </div>
-              <div class="actions">
-                <button class="danger delete" data-id="${item.id}">删除</button>
-                <button class="copy" data-id="${item.id}">复制</button>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-      // 滚动到底部以显示最新数据
-      requestAnimationFrame(() => {
-        listEl.scrollTop = listEl.scrollHeight;
-      });
+    // ====================== COPY功能 ======================
+    function setCopyStatus(message, isError = false) {
+      copyStatusEl.textContent = message;
+      copyStatusEl.style.color = isError ? 'var(--danger)' : 'var(--text-secondary)';
     }
 
-    function escapeHtml(str = "") {
+    function escapeHtml(str) {
       return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    function formatTime(ts) {
-      if (!ts) return "";
-      // treat DB timestamp as UTC, display in local time
-      const d = new Date(ts.endsWith("Z") ? ts : ts + "Z");
-      if (isNaN(d.getTime())) return ts;
-      return d.toLocaleString();
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      try {
+        const date = timestamp.endsWith('Z') ? new Date(timestamp) : new Date(timestamp + 'Z');
+        if (isNaN(date.getTime())) return timestamp;
+        return date.toLocaleString();
+      } catch {
+        return timestamp;
+      }
     }
 
-    function showToast(msg, isError = false) {
-      toastEl.textContent = msg;
-      toastEl.style.borderColor = isError ? "#fca5a5" : "var(--border)";
-      toastEl.style.display = "block";
-      setTimeout(() => { toastEl.style.display = "none"; }, 2200);
+    async function fetchTexts() {
+      setCopyStatus('加载中...');
+      try {
+        const response = await fetch(API_BASE + '/texts');
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '加载失败');
+
+        itemsCache = data.data || [];
+        renderCopyList(itemsCache);
+        setCopyStatus(`共 ${data.count || data.data.length} 条`);
+      } catch (error) {
+        setCopyStatus(error.message, true);
+      }
     }
 
-    async function submitText() {
-      const content = inputEl.value.trim();
-      inputEl.blur(); // 发送后收起键盘
-      inputEl.value = ""; // 点击即清空
-      if (!content) {
-        setStatus("内容不能为空", true);
+    function renderCopyList(items) {
+      if (!items || items.length === 0) {
+        copyListEl.innerHTML = '<div class="empty-state">暂无数据</div>';
         return;
       }
-      const tempItem = {
-        id: "tmp-" + Date.now(),
-        content,
-        created_at: new Date().toISOString(),
-      };
-      itemsCache = [tempItem, ...itemsCache];
-      renderList(itemsCache);
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 12000);
-        const res = await fetch(API_BASE + "/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content }),
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "提交失败");
-        // replace temp with real item
-        itemsCache = itemsCache.map(i => i.id === tempItem.id ? data.data : i);
-        setStatus("提交成功");
-        showToast("提交成功");
-        await fetchTexts();
-      } catch (e) {
-        setStatus(e.message, true);
-        showToast(e.message, true);
-        // revert optimistic item
-        itemsCache = itemsCache.filter(i => i.id !== tempItem.id);
-        renderList(itemsCache);
-      }
+
+      const html = items.map(item => {
+        const time = formatTime(item.created_at);
+        return `
+          <div class="item" data-id="${item.id}">
+            <div>
+              <div class="item-content">${escapeHtml(item.content)}</div>
+              <div class="item-meta">${time}</div>
+            </div>
+            <div class="item-actions">
+              <button class="btn copy-btn" data-id="${item.id}">复制</button>
+              <button class="btn btn-danger delete-btn" data-id="${item.id}">删除</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      copyListEl.innerHTML = html;
     }
 
-    async function deleteText(id) {
-      if (!id) return;
-      try {
-        const res = await fetch(API_BASE + "/texts/" + id, { method: "DELETE" });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "删除失败");
-        setStatus("删除成功");
-        showToast("删除成功");
-        await fetchTexts();
-      } catch (e) {
-        setStatus(e.message, true);
-        showToast(e.message, true);
-      }
-    }
-
-    async function copyContent(id) {
-      const item = listEl.querySelector(`.item[data-id="${id}"] .content`);
+    async function copyItem(id) {
+      const item = itemsCache.find(item => item.id === id);
       if (!item) return;
-      const text = item.textContent;
+
       try {
-        await navigator.clipboard.writeText(text);
-        setStatus("已复制到剪贴板");
-      } catch {
-        // 兼容部分移动端：使用临时 textarea 方式
-        try {
-          const helper = document.createElement("textarea");
-          helper.value = text;
-          helper.style.position = "fixed";
-          helper.style.opacity = "0";
-          helper.style.left = "-9999px";
-          document.body.appendChild(helper);
-          helper.focus();
-          helper.select();
-          const ok = document.execCommand("copy");
-          document.body.removeChild(helper);
-          if (ok) {
-            setStatus("已复制到剪贴板");
-            return;
-          }
-          throw new Error("execCommand 失败");
-        } catch {
-          setStatus("复制失败，请手动复制", true);
-        }
+        await navigator.clipboard.writeText(item.content);
+        showToast('已复制到剪贴板');
+      } catch (error) {
+        showToast('复制失败，请手动复制', true);
       }
     }
 
     function openDeleteModal(id) {
       pendingDeleteId = id;
-      modalTextEl.textContent = "确定删除这条记录吗？";
-      modalEl.style.display = "flex";
+      modalTextEl.textContent = '确定删除这条记录吗？';
+      modalEl.style.display = 'flex';
     }
 
     function closeDeleteModal() {
-      modalEl.style.display = "none";
+      modalEl.style.display = 'none';
       pendingDeleteId = null;
     }
 
-    listEl.addEventListener("click", (e) => {
-      const btn = e.target;
-      const id = btn.getAttribute("data-id");
+    async function deleteItem(id) {
       if (!id) return;
-      if (btn.classList.contains("copy")) copyContent(id);
-      if (btn.classList.contains("delete")) openDeleteModal(id);
+
+      try {
+        const response = await fetch(`${API_BASE}/texts/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '删除失败');
+
+        showToast('删除成功');
+        fetchTexts();
+      } catch (error) {
+        showToast(error.message, true);
+      }
+    }
+
+    async function submitCopyText() {
+      const content = copyInputEl.value.trim();
+      if (!content) {
+        setCopyStatus('内容不能为空', true);
+        return;
+      }
+
+      // 优化更新
+      copyInputEl.value = '';
+      const tempId = 'tmp-' + Date.now();
+      const tempItem = {
+        id: tempId,
+        content,
+        created_at: new Date().toISOString()
+      };
+
+      itemsCache = [tempItem, ...itemsCache];
+      renderCopyList(itemsCache);
+
+      try {
+        const response = await fetch(API_BASE + '/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '提交失败');
+
+        // 用正式数据替换临时数据
+        itemsCache = itemsCache.map(item =>
+          item.id === tempId ? data.data : item
+        );
+        renderCopyList(itemsCache);
+        setCopyStatus('提交成功');
+        showToast('提交成功');
+      } catch (error) {
+        setCopyStatus(error.message, true);
+        showToast(error.message, true);
+        itemsCache = itemsCache.filter(item => item.id !== tempId);
+        renderCopyList(itemsCache);
+      }
+    }
+
+    // COPY页面事件监听
+    copySendBtn.addEventListener('click', submitCopyText);
+    copyInputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitCopyText();
     });
 
-    let touchSending = false;
-    sendBtn.addEventListener("touchstart", (e) => {
-      touchSending = true;
-      e.preventDefault();
-      submitText();
-      setTimeout(() => { touchSending = false; }, 350);
-    }, { passive: false });
-    sendBtn.addEventListener("click", (e) => {
-      if (touchSending) return;
-      submitText();
-    });
-    inputEl.addEventListener("keydown", (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") submitText();
+    copyListEl.addEventListener('click', e => {
+      const btn = e.target;
+      const id = btn.dataset.id;
+      if (!id) return;
+
+      if (btn.classList.contains('copy-btn')) {
+        copyItem(id);
+      } else if (btn.classList.contains('delete-btn')) {
+        openDeleteModal(id);
+      }
     });
 
-    modalCancelBtn.addEventListener("click", closeDeleteModal);
-    modalEl.addEventListener("click", (e) => {
+    modalCancelBtn.addEventListener('click', closeDeleteModal);
+    modalConfirmBtn.addEventListener('click', () => {
+      if (pendingDeleteId) {
+        const id = pendingDeleteId;
+        closeDeleteModal();
+        deleteItem(id);
+      }
+    });
+
+    modalEl.addEventListener('click', e => {
       if (e.target === modalEl) closeDeleteModal();
     });
-    modalConfirmBtn.addEventListener("click", async () => {
-      if (!pendingDeleteId) return closeDeleteModal();
-      const id = pendingDeleteId;
-      closeDeleteModal();
-      await deleteText(id);
-    });
 
-    // =========================== TODO 相关功能 ===========================
-
-    // TODO专用状态设置函数
-    function setTodoStatus(msg, isError = false) {
-      todoStatusEl.textContent = msg || "";
-      todoStatusEl.style.color = isError ? "#b91c1c" : "var(--muted)";
-    }
-
-    // TODO列表渲染
-    function renderTodoList(todos) {
-      if (!todos.length) {
-        todoListEl.innerHTML = '<div style="color:var(--muted);text-align:center;padding:18px 0;">暂无TODO事项</div>';
-        return;
-      }
-
-      // 显示最新在底部：反转顺序（接口为倒序）
-      const ordered = [...todos].reverse();
-      todoListEl.innerHTML = ordered
-        .map(todo => {
-          const time = formatTime(todo.created_at);
-          return `
-            <div class="todo-item item" data-id="${todo.id}">
-              <div style="display: flex; align-items: start; gap: 12px; width: 100%;">
-                <!-- 单选框 -->
-                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" style="margin-top: 2px; cursor: pointer;" />
-                <div style="flex: 1;">
-                  <div class="content">${escapeHtml(todo.todoData)}</div>
-                  <div class="meta">${time}</div>
-                </div>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-
-      // 滚动到底部以显示最新数据
-      requestAnimationFrame(() => {
-        todoListEl.scrollTop = todoListEl.scrollHeight;
-      });
-
-      // 添加单选框点击事件
-      const checkboxes = todoListEl.querySelectorAll('.todo-checkbox');
-      checkboxes.forEach(cb => {
-        const id = cb.dataset.id;
-        // 移除之前的事件监听器
-        cb.replaceWith(cb.cloneNode(true));
-      });
-    }
-
-    // 获取TODO列表
+    // ====================== TODO功能 ======================
     async function fetchTodos() {
-      setTodoStatus("加载中...");
       try {
-        const res = await fetch(API_BASE + "/todoList");
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "加载失败");
+        const response = await fetch(API_BASE + '/todoList');
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '加载失败');
+
         todosCache = data.data || [];
         renderTodoList(todosCache);
-        setTodoStatus(`共 ${data.count ?? data.data.length} 项`);
-      } catch (e) {
-        setTodoStatus(e.message, true);
+      } catch (error) {
+        showToast(error.message, true);
       }
     }
 
-    // 提交TODO
-    async function submitTodo() {
-      const todoData = todoInputEl.value.trim();
-      todoInputEl.blur();
-      todoInputEl.value = "";
-      if (!todoData) {
-        setTodoStatus("TODO内容不能为空", true);
+    function renderTodoList(todos) {
+      if (!todos || todos.length === 0) {
+        todoListEl.innerHTML = '<div class="empty-state">暂无TODO事项</div>';
         return;
       }
 
+      const html = todos.map(todo => {
+        const time = formatTime(todo.created_at);
+        const isTemp = todo.id.startsWith('tmp-');
+        return `
+          <div class="todo-item" data-id="${todo.id}">
+            <div class="todo-checkbox-wrapper">
+              <input type="checkbox" id="todo-${todo.id}" class="todo-checkbox-input" data-id="${todo.id}" ${isTemp ? 'disabled' : ''} />
+              <span class="custom-checkbox"></span>
+            </div>
+            <div class="todo-content-wrapper">
+              <div class="todo-content">${escapeHtml(todo.todoData || '')}</div>
+              <div class="todo-time">${time}</div>
+            </div>
+          </div>
+        `;
+      }).reverse().join('');
+
+      todoListEl.innerHTML = html;
+    }
+
+    async function addTodo() {
+      const todoData = todoInputEl.value.trim();
+      if (!todoData) {
+        showToast('请输入TODO内容', true);
+        return;
+      }
+
+      todoInputEl.value = '';
+      const tempId = 'tmp-' + Date.now();
       const tempTodo = {
-        id: "tmp-" + Date.now(),
+        id: tempId,
         todoData,
-        created_at: new Date().toISOString(),
+        created_at: new Date().toISOString()
       };
 
       todosCache = [tempTodo, ...todosCache];
       renderTodoList(todosCache);
 
       try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 12000);
-        const res = await fetch(API_BASE + "/todo-submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ todoData }),
-          signal: controller.signal,
+        const response = await fetch(API_BASE + '/todo-submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ todoData })
         });
-        clearTimeout(timer);
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "提交失败");
 
-        // replace temp with real item
-        todosCache = todosCache.map(i => i.id === tempTodo.id ? data.data : i);
-        setTodoStatus("添加成功");
-        showToast("TODO添加成功");
-        await fetchTodos();
-      } catch (e) {
-        setTodoStatus(e.message, true);
-        showToast(e.message, true);
-        // revert optimistic item
-        todosCache = todosCache.filter(i => i.id !== tempTodo.id);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '提交失败');
+
+        todosCache = todosCache.map(todo =>
+          todo.id === tempId ? data.data : todo
+        );
+        renderTodoList(todosCache);
+        showToast('TODO添加成功');
+      } catch (error) {
+        showToast(error.message, true);
+        todosCache = todosCache.filter(todo => todo.id !== tempId);
         renderTodoList(todosCache);
       }
     }
 
-    // 删除TODO（通过点击单选框）
     async function deleteTodo(id) {
-      if (!id) {
-        setTodoStatus("缺少ID", true);
-        return;
+      if (!id || id.startsWith('tmp-')) return;
+
+      const todoItem = todoListEl.querySelector(`.todo-item[data-id="${id}"]`);
+      if (todoItem) {
+        todoItem.classList.add('removing');
+        setTimeout(() => {
+          if (todoItem.parentNode) {
+            todoItem.remove();
+          }
+        }, 300);
       }
 
       try {
-        const res = await fetch(API_BASE + "/del-todo", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
+        const response = await fetch(API_BASE + '/del-todo', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
         });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "删除失败");
 
-        setTodoStatus("已删除");
-        showToast("TODO已删除");
-        await fetchTodos();
-      } catch (e) {
-        setTodoStatus(e.message, true);
-        showToast(e.message, true);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error || '删除失败');
+
+        todosCache = todosCache.filter(todo => todo.id !== id);
+        if (todosCache.length === 0) {
+          renderTodoList([]);
+        }
+      } catch (error) {
+        showToast(error.message, true);
+        renderTodoList(todosCache);
       }
     }
 
-    // TODO相关事件监听
-    let todoTouchSending = false;
-    todoSendBtn.addEventListener("touchstart", (e) => {
-      todoTouchSending = true;
-      e.preventDefault();
-      submitTodo();
-      setTimeout(() => { todoTouchSending = false; }, 350);
-    }, { passive: false });
-
-    todoSendBtn.addEventListener("click", (e) => {
-      if (todoTouchSending) return;
-      submitTodo();
+    // TODO页面事件监听
+    todoSendBtn.addEventListener('click', addTodo);
+    todoInputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') addTodo();
     });
 
-    todoInputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        submitTodo();
+    // TODO列表点击事件（使用事件委托）
+    todoListEl.addEventListener('click', e => {
+      // 如果点击了自定义复选框
+      if (e.target.classList.contains('custom-checkbox')) {
+        const checkboxWrapper = e.target.parentElement;
+        const checkboxInput = checkboxWrapper.querySelector('.todo-checkbox-input');
+        if (checkboxInput && !checkboxInput.disabled && !checkboxInput.checked) {
+          const id = checkboxInput.dataset.id;
+          if (id) {
+            checkboxInput.checked = true;
+            deleteTodo(id);
+          }
+        }
       }
-    });
 
-    // 监听TODO列表的单选框点击
-    todoListEl.addEventListener("click", (e) => {
-      const target = e.target;
-      if (target.classList.contains("todo-checkbox")) {
-        const id = target.dataset.id;
-        if (id && !id.startsWith("tmp-")) {
-          deleteTodo(id);
+      // 如果点击了复选框包装器（包括标签区域）
+      if (e.target.classList.contains('todo-checkbox-wrapper')) {
+        const checkboxWrapper = e.target;
+        const checkboxInput = checkboxWrapper.querySelector('.todo-checkbox-input');
+        if (checkboxInput && !checkboxInput.disabled && !checkboxInput.checked) {
+          const id = checkboxInput.dataset.id;
+          if (id) {
+            checkboxInput.checked = true;
+            deleteTodo(id);
+          }
         }
       }
     });
 
-    // 根据当前激活的tab加载数据
+    // 初始化
+    initTheme();
+
+    // API测试函数
+    async function testAPIConnection() {
+      console.log('测试API连接...');
+      try {
+        console.log('API基础URL:', API_BASE);
+
+        // 测试texts接口
+        const textsRes = await fetch(API_BASE + '/texts');
+        const textsData = await textsRes.json();
+        console.log('texts接口状态:', textsRes.status, textsData.success ? '✅ 正常' : '❌ 异常');
+
+        // 测试todoList接口
+        try {
+          const todoRes = await fetch(API_BASE + '/todoList');
+          const todoData = await todoRes.json();
+          console.log('todoList接口状态:', todoRes.status, todoData.success ? '✅ 正常' : '❌ 异常');
+        } catch (todoError) {
+          console.warn('todoList接口错误:', todoError.message);
+        }
+      } catch (error) {
+        console.error('API连接测试失败:', error);
+      }
+    }
+
+    // 根据当前tab加载数据
     const activeTab = getActiveTab();
     if (activeTab === 'copy') {
       fetchTexts();
     } else {
       fetchTodos();
     }
+
+    // 可选：运行API测试
+    // testAPIConnection();
   </script>
 </body>
+</html>
