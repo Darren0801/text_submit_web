@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
-  <title>COPY</title>
+  <title>FISHBLUE</title>
   <style>
     /* VSCode深色主题配色 */
     :root {
@@ -873,7 +873,9 @@
         renderCopyList(itemsCache);
         setCopyStatus(`共 ${data.count || data.data.length} 条`);
       } catch (error) {
-        setCopyStatus(error.message, true);
+        // 错误时也显示条数，或清空状态
+        setCopyStatus(`共 ${itemsCache.length} 条`);
+        showToast('加载失败: ' + error.message, true);
       }
     }
 
@@ -883,7 +885,10 @@
         return;
       }
 
-      const html = items.map(item => {
+      // COPY页面：新数据在底部，所以需要反转数组
+      const reversedItems = [...items].reverse();
+
+      const html = reversedItems.map(item => {
         const time = formatTime(item.created_at);
         return `
           <div class="item" data-id="${item.id}">
@@ -928,6 +933,13 @@
     async function deleteItem(id) {
       if (!id) return;
 
+      // 立即从缓存中移除，乐观更新
+      const oldCount = itemsCache.length;
+      itemsCache = itemsCache.filter(item => item.id !== id);
+      renderCopyList(itemsCache);
+      setCopyStatus(`共 ${itemsCache.length} 条`);
+      showToast('删除成功');
+
       try {
         const response = await fetch(`${API_BASE}/texts/${id}`, {
           method: 'DELETE'
@@ -935,17 +947,18 @@
         const data = await response.json();
         if (!data.success) throw new Error(data.error || '删除失败');
 
-        showToast('删除成功');
-        fetchTexts();
+        // 保持乐观更新，无需额外操作
       } catch (error) {
-        showToast(error.message, true);
+        showToast('删除失败: ' + error.message, true);
+        // 如果删除失败，需要恢复数据
+        fetchTexts();
       }
     }
 
     async function submitCopyText() {
       const content = copyInputEl.value.trim();
       if (!content) {
-        setCopyStatus('内容不能为空', true);
+        showToast('内容不能为空', true);
         return;
       }
 
@@ -960,6 +973,13 @@
 
       itemsCache = [tempItem, ...itemsCache];
       renderCopyList(itemsCache);
+
+      // 滚动到底部显示最新数据
+      setTimeout(() => {
+        if (copyListEl.scrollHeight > copyListEl.clientHeight) {
+          copyListEl.scrollTop = copyListEl.scrollHeight;
+        }
+      }, 10);
 
       try {
         const response = await fetch(API_BASE + '/submit', {
@@ -976,11 +996,20 @@
           item.id === tempId ? data.data : item
         );
         renderCopyList(itemsCache);
-        setCopyStatus('提交成功');
+        // 只更新条数，不显示"提交成功"
+        setCopyStatus(`共 ${itemsCache.length} 条`);
         showToast('提交成功');
+
+        // 滚动到底部显示最新数据
+        setTimeout(() => {
+          if (copyListEl.scrollHeight > copyListEl.clientHeight) {
+            copyListEl.scrollTop = copyListEl.scrollHeight;
+          }
+        }, 10);
       } catch (error) {
-        setCopyStatus(error.message, true);
-        showToast(error.message, true);
+        // 出错时也保持条数显示，错误用toast提示
+        setCopyStatus(`共 ${itemsCache.length - 1} 条`); // 减去要删除的临时项
+        showToast('提交失败: ' + error.message, true);
         itemsCache = itemsCache.filter(item => item.id !== tempId);
         renderCopyList(itemsCache);
       }
@@ -1027,7 +1056,11 @@
         todosCache = data.data || [];
         renderTodoList(todosCache);
       } catch (error) {
-        showToast(error.message, true);
+        showToast('加载TODO失败: ' + error.message, true);
+        // 保持现有缓存，或清空
+        if (!todosCache.length) {
+          renderTodoList([]);
+        }
       }
     }
 
@@ -1052,7 +1085,7 @@
             </div>
           </div>
         `;
-      }).reverse().join('');
+      }).join('');
 
       todoListEl.innerHTML = html;
     }
@@ -1075,6 +1108,11 @@
       todosCache = [tempTodo, ...todosCache];
       renderTodoList(todosCache);
 
+      // 滚动到顶部显示最新数据
+      setTimeout(() => {
+        todoListEl.parentElement.scrollTop = 0;
+      }, 10);
+
       try {
         const response = await fetch(API_BASE + '/todo-submit', {
           method: 'POST',
@@ -1090,6 +1128,11 @@
         );
         renderTodoList(todosCache);
         showToast('TODO添加成功');
+
+        // 保持滚动到顶部
+        setTimeout(() => {
+          todoListEl.parentElement.scrollTop = 0;
+        }, 10);
       } catch (error) {
         showToast(error.message, true);
         todosCache = todosCache.filter(todo => todo.id !== tempId);
@@ -1099,6 +1142,9 @@
 
     async function deleteTodo(id) {
       if (!id || id.startsWith('tmp-')) return;
+
+      // 先立即从缓存中移除（乐观更新）
+      todosCache = todosCache.filter(todo => todo.id !== id);
 
       const todoItem = todoListEl.querySelector(`.todo-item[data-id="${id}"]`);
       if (todoItem) {
@@ -1120,13 +1166,12 @@
         const data = await response.json();
         if (!data.success) throw new Error(data.error || '删除失败');
 
-        todosCache = todosCache.filter(todo => todo.id !== id);
-        if (todosCache.length === 0) {
-          renderTodoList([]);
-        }
+        // 已经显示动画，无需额外toast
+        // 缓存已更新，无需再次更新
       } catch (error) {
         showToast(error.message, true);
-        renderTodoList(todosCache);
+        // 如果失败，重新获取数据
+        fetchTodos();
       }
     }
 
