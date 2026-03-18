@@ -323,6 +323,10 @@
       background: #777;
     }
 
+    :root.dark .todo-item:hover {
+      border-color: var(--accent);
+    }
+
     .input-row {
       display: flex;
       gap: 8px;
@@ -348,22 +352,39 @@
       box-shadow: 0 0 0 2px rgba(var(--accent-rgb, 37, 99, 235), 0.1);
     }
 
-    /* TODO页面样式 */
+    /* TODO页面样式 - 添加与COPY页面一致的内边距 */
+    .todo-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      min-height: 0; /* 重要：使flex容器可以收缩 */
+    }
+
     .todo-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0;
+      gap: 16px;
       min-height: 0; /* 重要：使flex容器可以收缩 */
     }
 
     .todo-input-area {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 14px;
       padding: 16px;
-      margin-bottom: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
       flex-shrink: 0; /* 防止输入区域被压缩 */
+    }
+
+    :root.dark .todo-input-area {
+      box-shadow: none;
+      background: #1e1e1e;
+      border-color: #404040;
     }
 
     .todo-input-row {
@@ -394,14 +415,21 @@
       overflow-y: auto;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    :root.dark .todo-list-wrapper {
+      box-shadow: none;
+      background: #1e1e1e;
+      border-color: #404040;
     }
 
     .todo-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       min-height: 0; /* 重要：使flex容器可以收缩 */
     }
 
@@ -411,10 +439,14 @@
       gap: 14px;
       padding: 14px;
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--card);
       transition: all 0.4s ease;
       animation: slideDown 0.3s ease;
+    }
+
+    .todo-item:hover {
+      border-color: var(--accent);
     }
 
     @keyframes slideDown {
@@ -624,15 +656,19 @@
         padding: 6px 10px;
       }
 
-      .copy-page {
+      .copy-page, .todo-page {
         padding: 12px 0;
       }
 
-      .card {
+      .card, .todo-input-area, .todo-list-wrapper {
         border-radius: 12px;
       }
 
       .list {
+        padding: 12px;
+      }
+
+      .todo-list-wrapper {
         padding: 12px;
       }
 
@@ -681,18 +717,20 @@
 
     <!-- TODO页面 -->
     <div id="todo-tab" class="tab-content">
-      <div class="todo-container">
-        <!-- 顶部输入区域 -->
-        <div class="todo-input-area">
-          <div class="todo-input-row">
-            <input id="todo-input" class="todo-input" type="text" placeholder="输入TODO事项..." autocomplete="off" />
-            <button id="todo-send" class="btn btn-primary">添加</button>
+      <div class="todo-page">
+        <div class="todo-container">
+          <!-- 顶部输入区域 -->
+          <div class="todo-input-area">
+            <div class="todo-input-row">
+              <input id="todo-input" class="todo-input" type="text" placeholder="输入TODO事项..." autocomplete="off" />
+              <button id="todo-send" class="btn btn-primary">添加</button>
+            </div>
           </div>
-        </div>
 
-        <!-- TODO列表 -->
-        <div class="todo-list-wrapper">
-          <div id="todo-list" class="todo-list"></div>
+          <!-- TODO列表 -->
+          <div class="todo-list-wrapper">
+            <div id="todo-list" class="todo-list"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1110,7 +1148,10 @@
 
       // 滚动到顶部显示最新数据
       setTimeout(() => {
-        todoListEl.parentElement.scrollTop = 0;
+        const todoListWrapper = todoListEl.closest('.todo-list-wrapper');
+        if (todoListWrapper) {
+          todoListWrapper.scrollTop = 0;
+        }
       }, 10);
 
       try {
@@ -1131,7 +1172,10 @@
 
         // 保持滚动到顶部
         setTimeout(() => {
-          todoListEl.parentElement.scrollTop = 0;
+          const todoListWrapper = todoListEl.closest('.todo-list-wrapper');
+          if (todoListWrapper) {
+            todoListWrapper.scrollTop = 0;
+          }
         }, 10);
       } catch (error) {
         showToast(error.message, true);
