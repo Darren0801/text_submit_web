@@ -148,6 +148,57 @@
       background: var(--accent);
     }
 
+    /* 刷新按钮样式 */
+    .refresh-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      width: 36px;
+      height: 32px;
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+
+    .refresh-btn:active {
+      background: rgba(var(--accent-rgb), 0.2);
+    }
+
+    .refresh-btn svg {
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    /* 刷新动画 */
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .refresh-btn.refreshing svg {
+      animation: spin 1s linear infinite;
+    }
+
+    .refresh-btn.refreshing {
+      pointer-events: none;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     /* 内容区域 */
     .content-area {
       flex: 1;
@@ -325,6 +376,11 @@
 
     :root.dark .todo-item:hover {
       border-color: var(--accent);
+    }
+
+    :root.dark .refresh-btn.refreshing {
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .input-row {
@@ -628,16 +684,22 @@
       .top-bar {
         flex-direction: row;
         flex-wrap: nowrap;
-        gap: 10px;
+        gap: 8px;
       }
 
       .title-section {
         flex: 1;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
       .app-title {
         font-size: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .tab-switcher {
@@ -649,6 +711,17 @@
         padding: 6px 10px;
         min-width: 60px;
         font-size: 12px;
+      }
+
+      .refresh-btn {
+        width: 32px;
+        height: 30px;
+        padding: 5px;
+      }
+
+      .refresh-btn svg {
+        width: 14px;
+        height: 14px;
       }
 
       .theme-toggle {
@@ -692,6 +765,14 @@
         <button class="tab-btn active" data-tab="copy">COPY</button>
         <button class="tab-btn" data-tab="todo">TODO</button>
       </div>
+      <button class="refresh-btn" id="refreshBtn" title="刷新当前列表">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0114.13-3.36L23 10"></path>
+          <path d="M20.49 15a9 9 0 01-14.13 3.36L1 14"></path>
+        </svg>
+      </button>
     </div>
     <button class="theme-toggle" id="themeBtn">
       <span class="theme-dot"></span>
@@ -757,6 +838,7 @@
     // DOM元素
     const themeBtn = document.getElementById('themeBtn');
     const themeLabel = document.getElementById('themeLabel');
+    const refreshBtn = document.getElementById('refreshBtn');
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -809,6 +891,26 @@
     themeBtn.addEventListener('click', () => {
       const isDark = document.documentElement.classList.contains('dark');
       applyTheme(isDark ? 'light' : 'dark');
+    });
+
+    // 刷新按钮功能
+    refreshBtn.addEventListener('click', () => {
+      const activeTab = getActiveTab();
+
+      // 添加旋转动画
+      refreshBtn.classList.add('refreshing');
+      showToast('正在刷新...');
+
+      // 设置定时器移除动画类
+      setTimeout(() => {
+        refreshBtn.classList.remove('refreshing');
+      }, 1000);
+
+      if (activeTab === 'copy') {
+        fetchTexts();
+      } else {
+        fetchTodos();
+      }
     });
 
     // Tab切换功能
