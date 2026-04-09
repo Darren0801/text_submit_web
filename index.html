@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
 
   <title>FISHBLUE</title>
   <style>
@@ -51,11 +53,14 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      min-height: 100dvh; /* Chrome移动端动态视口高度 */
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       padding: 12px;
+      padding-bottom: env(safe-area-inset-bottom, 0); /* 适配iPhone刘海屏 */
     }
 
     /* 顶部标题栏 */
@@ -760,20 +765,45 @@
       /* COPY页面移动端优化 */
       .input-row {
         padding: 12px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)); /* 适配底部安全区域 */
         position: sticky;
         bottom: 0;
         background: var(--card);
         z-index: 10;
+        /* Chrome移动端优化 */
+        transform: translateZ(0); /* 开启硬件加速 */
+        will-change: transform;
       }
 
       .text-input {
         font-size: 16px; /* 防止iOS缩放 */
         padding: 12px;
+        /* Chrome移动端优化 */
+        -webkit-appearance: none; /* 移除默认样式 */
+        border-radius: 4px;
       }
 
       #send {
         padding: 12px 20px;
         font-size: 14px;
+        /* Chrome移动端优化 */
+        -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+        touch-action: manipulation;
+      }
+
+      /* Chrome移动端卡片优化 */
+      .card {
+        /* 确保卡片在Chrome移动端正确显示 */
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100dvh - 80px); /* 限制最大高度 */
+      }
+
+      /* 列表区域在Chrome移动端的优化 */
+      .list {
+        /* 确保滚动流畅 */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
       }
     }
   </style>
