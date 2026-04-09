@@ -390,6 +390,8 @@
       border-top: 1px solid var(--border);
       background: var(--card);
       flex-shrink: 0; /* 防止输入区域被压缩 */
+      position: sticky;
+      bottom: 0;
     }
 
     .text-input {
@@ -739,6 +741,7 @@
 
       .list {
         padding: 12px;
+        padding-bottom: 80px; /* 为底部输入框预留空间 */
       }
 
       .todo-list-wrapper {
@@ -752,6 +755,25 @@
 
       .item-actions {
         justify-content: flex-end;
+      }
+
+      /* COPY页面移动端优化 */
+      .input-row {
+        padding: 12px;
+        position: sticky;
+        bottom: 0;
+        background: var(--card);
+        z-index: 10;
+      }
+
+      .text-input {
+        font-size: 16px; /* 防止iOS缩放 */
+        padding: 12px;
+      }
+
+      #send {
+        padding: 12px 20px;
+        font-size: 14px;
       }
     }
   </style>
